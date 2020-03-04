@@ -69,8 +69,8 @@ const heavyCalculationsFork2 = heavyCalculations.fork();
 console.time('exec');
 const [result1, result2, result3] = await Promise.all([
   heavyCalculations(a),
-  heavyCalculationsFork2(b),
-  heavyCalculationsFork3(c),
+  heavyCalculationsFork1(b),
+  heavyCalculationsFork2(c),
 ]);
 console.timeEnd('exec'); // 1 second
 ```
