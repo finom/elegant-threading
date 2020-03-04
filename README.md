@@ -53,7 +53,7 @@ const [result1, result2, result3] = await Promise.all([
 console.timeEnd('exec'); // 3 seconds
 ```
 
-The execution is going to take ~3 seconds because another function isn't able to be called before previous is done.
+The overall execution is going to take ~3 seconds because another function isn't able to be called before previous is done.
 
 To make this code run even faster you can fork the threaded function to create its own worker per every fork. It can be made by using `fork` method of a returned threaded function.
 
