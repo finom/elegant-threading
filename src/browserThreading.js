@@ -10,11 +10,11 @@ function browserThreading(source, exported) {
     new Blob([`${stringifySource(source)}
       ${stringifyExpored(exported)}
 
-      let latestId;
+      let latestId0;
 
       function callConsole0(method, args) {
         try {
-          postMessage({ type: 'console', method: method, args: [].slice.call(args), id: latestId });
+          postMessage({ type: 'console', method: method, args: [].slice.call(args), id: latestId0 });
         } catch(e) {
           postMessage({ type: 'call', error: {
             name: e.name,
@@ -22,7 +22,7 @@ function browserThreading(source, exported) {
             message: e.message,
             lineNumber: e.lineNumber,
             columnNumber: e.columnNumber,
-          }, id: latestId });
+          }, id: latestId0 });
         }
       }
 
@@ -35,8 +35,8 @@ function browserThreading(source, exported) {
 
       onmessage = function(e) {
         let result, error;
-        latestId = e.data.id;
-        try { result = ${getSourceFunctionName(source)}.apply(this, e.data.message) } catch(e) { console.log(e);error = {
+        latestId0 = e.data.id;
+        try { result = ${getSourceFunctionName(source)}.apply(this, e.data.message) } catch(e) { error = {
           name: e.name,
           stack: e.stack,
           message: e.message,
