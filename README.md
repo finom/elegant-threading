@@ -125,13 +125,11 @@ function foo() {
 }
 
 function bar() {
-  // do something
+  foo();
 }
 
 function main(a, b, c) {
-  foo();
   bar();
-
   return someResult;
 }
 
