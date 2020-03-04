@@ -6,7 +6,7 @@ The tool allows to define functions which are going to be executed in a separate
 
 Install it via `npm i elegant-threading` or use as a global variable called `elegantThreading` in a non-CJS environment (see dist/ folder).
 
-Let's say you have some function which runs some heavy calculations:
+Let's say you have a function which runs some heavy calculations:
 
 ```js
 function heavyCalculations(a, b, c) {
@@ -14,7 +14,7 @@ function heavyCalculations(a, b, c) {
   return calculateHeavyThing(a, b, c);
 }
 
-// main thread is blocked while the function is executed
+// the main thread is blocked while the function is executed
 const result = heavyCalculations(a, b, c);
 ```
 
@@ -24,7 +24,8 @@ If it blocks the main thread you can wrap `heavyCalculations` by the elegant-thr
 const thread = require('elegant-threading');
 
 const heavyCalculations = thread(function heavyCalculations(a, b, c) {
-  console.log('calculating a heavy thing'); // yep, console methods also work!
+  // yep, console methods also work despite the fact that this is a Worker
+  console.log('calculating a heavy thing');
   return calculateHeavyThing(a, b, c);
 });
 
@@ -32,11 +33,11 @@ const heavyCalculations = thread(function heavyCalculations(a, b, c) {
 const result = await heavyCalculations(a, b, c);
 ```
 
-The only requirement to the passed function is that it needs to be implemented as a [pure function](https://en.wikipedia.org/wiki/Pure_function) because it has its own scope where other variables defined at the main thread aren't available including global ones like `window`. For more info see [Web Worker docs](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API). [Workers of NodeJS environment](https://nodejs.org/api/worker_threads.html) is more flexible at this case but it's still recommended to follow the pureness of your function to make it work at both environments.
+The only requirement to the passed function is that it needs to be implemented as a [pure function](https://en.wikipedia.org/wiki/Pure_function) because it has its own scope where other variables defined at the main thread aren't available including global ones like `window`. For more info see [Web Worker docs](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API). [Workers of NodeJS environment](https://nodejs.org/api/worker_threads.html) in its turn is more flexible at this case but it's still recommended to follow the pureness of your function to make it work at both environments.
 
 ## Forking via threadedFunction.fork()
 
-When a threaded function is defined it creates a single instance of Worker class (based on environment) which means that if you call the function multiple times it's going to wait for other calls to be done. Let's say thefollowing function execution takes 1 second.
+When a threaded function is defined it creates a single instance of Worker class (based on environment) which means that if you call the function multiple times it's going to wait for other calls to be done. Let's say the following function execution takes 1 second.
 
 ```js
 const heavyCalculations = thread(function heavyCalculations(arg) {
@@ -54,7 +55,7 @@ console.timeEnd('exec'); // 3 seconds
 
 The execution is going to take ~3 seconds because another function isn't able to be called before previous is done.
 
-To make this code run even faster you can fork the threaded function to create its own worker per every fork. It can be made by `fork` method of a returned threaded function.
+To make this code run even faster you can fork the threaded function to create its own worker per every fork. It can be made by using `fork` method of a returned threaded function.
 
 
 ```js
@@ -62,9 +63,9 @@ const heavyCalculations = thread(function heavyCalculations(arg) {
   return calculateHeavyThing(arg); // 1 second
 });
 
-const heavyCalculationsFork1 = heavyCalculations.fork()
-const heavyCalculationsFork2 = heavyCalculations.fork()
-const heavyCalculationsFork3 = heavyCalculations.fork()
+const heavyCalculationsFork1 = heavyCalculations.fork();
+const heavyCalculationsFork2 = heavyCalculations.fork();
+const heavyCalculationsFork3 = heavyCalculations.fork();
 
 console.time('exec');
 const [result1, result2, result3] = await Promise.all([
