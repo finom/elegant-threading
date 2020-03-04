@@ -138,7 +138,7 @@ const heavyCalculations = thread(main, [foo, bar]); // <---
 const result = await heavyCalculations(a, b, c);
 ```
 
-Is required that every exported function needs to be defined as [function declaration](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function). This approach has one downside: since they're stringified to be also a part of an inline worker, an error is thrown inside them may show you a wrong line number. But it can be debugged with the help of `console.log` method or other `console` methods.
+Is's a requirement that every exported function needs to be defined as [function declaration](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function). This approach has one downside: since they're stringified to be also a part of an inline worker, an error is thrown inside them may show you a wrong line number. But it can be debugged with the help of `console.log` method or other `console` methods.
 
 ## Tests
 
