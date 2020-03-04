@@ -2,7 +2,7 @@
   "name": "elegant-threading",
   "version": "0.0.1",
   "description": "A straightforward definition of multi-threaded functions for NodeJS and browser",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "npm run lint && npm run node-test && npm run browser-test",
     "lint": "eslint . --fix",
