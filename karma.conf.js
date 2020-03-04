@@ -30,7 +30,12 @@ module.exports = function karmaConf(config) {
       [`${__dirname}/test/*.spec.js`]: ['webpack'],
     },
 
-    webpack: {},
+    webpack: {
+      optimization: {
+        // We no not want to minimize tested code.
+        minimize: false,
+      },
+    },
 
 
     // test results reporter to use

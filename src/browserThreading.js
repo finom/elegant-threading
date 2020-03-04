@@ -16,7 +16,13 @@ function browserThreading(source, exported) {
         try {
           postMessage({ type: 'console', method: method, args: [].slice.call(args), id: latestId });
         } catch(e) {
-          postMessage({ type: 'call', error: e, id: latestId });
+          postMessage({ type: 'call', error: {
+            name: e.name,
+            stack: e.stack,
+            message: e.message,
+            lineNumber: e.lineNumber,
+            columnNumber: e.columnNumber,
+          }, id: latestId });
         }
       }
 
@@ -30,7 +36,13 @@ function browserThreading(source, exported) {
       onmessage = function(e) {
         let result, error;
         latestId = e.data.id;
-        try { result = ${getSourceFunctionName(source)}.apply(this, e.data.message) } catch(e) { error = e; }
+        try { result = ${getSourceFunctionName(source)}.apply(this, e.data.message) } catch(e) { console.log(e);error = {
+          name: e.name,
+          stack: e.stack,
+          message: e.message,
+          lineNumber: e.lineNumber,
+          columnNumber: e.columnNumber,
+        }; }
         postMessage({ type: 'call', result: result, error: error, id: e.data.id });
       }
     `], { type: 'text/javascript' }),
@@ -47,7 +59,7 @@ function browserThreading(source, exported) {
           worker.removeEventListener('message', onMessage);
           worker.removeEventListener('message', onError); // eslint-disable-line no-use-before-define
           if (data.error) {
-            reject(data.error);
+            reject(Object.assign(Object.create(Error.prototype), data.error));
           } else {
             resolve(data.result);
           }
