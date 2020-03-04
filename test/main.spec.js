@@ -14,26 +14,32 @@ describe('Main', () => {
   });
 
   it('should fork', async () => {
-    const f = thread(() => {
+    const f = thread((runId) => {
       const workerNow = Date.now();
       // "calculation" is going to take 1 second
       while (workerNow > Date.now() - 1000) {
         // noop
       }
+
+      return runId;
     });
 
     let now = Date.now();
 
-    await Promise.all([
-      f(), f(), f(),
+    let result = await Promise.all([
+      f('one'), f('two'), f('three'),
     ]);
+
+    expect(result).toEqual(['one', 'two', 'three']);
 
     const nonForkedExecutionTime = Date.now() - now;
 
     now = Date.now();
-    await Promise.all([
-      f.fork()(), f.fork()(), f.fork()(),
+    result = await Promise.all([
+      f('one'), f.fork()('two'), f.fork()('three'),
     ]);
+
+    expect(result).toEqual(['one', 'two', 'three']);
 
     const forkedExecutionTime = Date.now() - now;
 
