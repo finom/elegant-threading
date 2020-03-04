@@ -2,7 +2,7 @@
 
 > A straightforward definition of multi-threaded functions for NodeJS and browser
 
-The tool allows to define functions which are going to be executed in a separate thread in the most straightforward way. It has zero dependencies and it doesn't require anything else like an additional Webpack plugin. elegant-threading works both at node and at browsers which makes possible to develop universal functions with heavy calculations (finding prime numbers, working with heavy amounts of data, etc) and publish them at NPM to be used at any of these environments.
+The tool allows to define functions which are going to be executed in a separate thread in the most straightforward way. It has zero dependencies and it doesn't require anything else like an additional Webpack plugin. elegant-threading works both at NodeJS and browsers which makes possible to develop universal functions with heavy calculations (finding prime numbers, working with heavy amounts of data, etc) and publish them at NPM to be used at any of these environments.
 
 Install it via `npm i elegant-threading` or use as a global variable called `elegantThreading` in a non-CJS environment (see dist/ folder).
 
