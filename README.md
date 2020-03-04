@@ -37,7 +37,7 @@ The only requirement to the passed function is that it needs to be implemented a
 
 ## Forking via threadedFunction.fork()
 
-When a threaded function is defined it creates a single instance of Worker class (based on environment) which means that if you call the function multiple times it's going to wait for other calls to be done. Let's say the following function execution takes 1 second.
+When a threaded function is defined it creates a single instance of Worker class (Web Worker or a Worker Thread, based on environment) which means that if you call the function multiple times it's going to wait for other calls to be done. Let's say the following function execution takes 1 second.
 
 ```js
 const heavyCalculations = thread(function heavyCalculations(arg) {
