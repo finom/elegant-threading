@@ -9,7 +9,7 @@
     "build": "webpack --mode production",
     "node-test": "npx jasmine --config=jasmine.json",
     "browser-test": "karma start",
-    "postversion": "git push && git push --tags"
+    "postversion": "npm publish && git push && git push --tags"
   },
   "repository": {
     "type": "git",

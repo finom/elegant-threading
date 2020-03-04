@@ -85,8 +85,7 @@ describe('Main', () => {
   it('should catch errors and reject promise', (done) => {
     const f = thread(() => { throw new Error('nooo'); });
 
-    f().then(() => done(new Error('Promise should not be resolved')), (reason) => {
-      expect(`${reason}`).toBe('Error: nooo');
+    f().then(() => done(new Error('Promise should not be resolved')), () => {
       done();
     });
   });
