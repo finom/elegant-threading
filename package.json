@@ -1,6 +1,6 @@
 {
   "name": "elegant-threading",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A straightforward definition of multi-threaded functions for NodeJS and browser",
   "main": "src/index.js",
   "scripts": {
