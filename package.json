@@ -9,6 +9,7 @@
     "build": "webpack --mode production",
     "node-test": "npx jasmine --config=jasmine.json",
     "browser-test": "karma start",
+    "upgrade": "ncu -u && npm i",
     "postversion": "npm publish && npm run build && git commit -am 'chore: Build' && git push && git push --tags"
   },
   "repository": {
@@ -42,7 +43,8 @@
     "karma-chrome-launcher": "^3.1.0",
     "karma-jasmine": "^3.1.1",
     "karma-webpack": "^4.0.2",
-    "webpack": "^4.41.6",
+    "npm-check-updates": "^4.0.3",
+    "webpack": "^4.42.0",
     "webpack-cli": "^3.3.11"
   },
   "dependencies": {}
