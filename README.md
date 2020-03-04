@@ -65,11 +65,10 @@ const heavyCalculations = thread(function heavyCalculations(arg) {
 
 const heavyCalculationsFork1 = heavyCalculations.fork();
 const heavyCalculationsFork2 = heavyCalculations.fork();
-const heavyCalculationsFork3 = heavyCalculations.fork();
 
 console.time('exec');
 const [result1, result2, result3] = await Promise.all([
-  heavyCalculationsFork1(a),
+  heavyCalculations(a),
   heavyCalculationsFork2(b),
   heavyCalculationsFork3(c),
 ]);
