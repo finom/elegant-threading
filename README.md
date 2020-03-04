@@ -33,7 +33,7 @@ const heavyCalculations = thread(function heavyCalculations(a, b, c) {
 const result = await heavyCalculations(a, b, c);
 ```
 
-The only requirement to the passed function is that it needs to be implemented as a [pure function](https://en.wikipedia.org/wiki/Pure_function) because it has its own scope where other variables defined at the main thread aren't available including global ones like `window`. For more info see [Web Worker docs](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API). [Workers of NodeJS environment](https://nodejs.org/api/worker_threads.html) in its turn is more flexible at this case but it's still recommended to follow the pureness of your function to make it work at both environments.
+The only requirement to the passed function is that it needs to be implemented as a [pure function](https://en.wikipedia.org/wiki/Pure_function) because it has its own scope where other variables defined at the main thread aren't available including global ones like `window`. For more info see [Web Worker docs](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API). [Workers of NodeJS environment](https://nodejs.org/api/worker_threads.html) in their turn are more flexible at this case but it's still recommended to follow the pureness of your function to make it work properly at both environments.
 
 ## Forking via threadedFunction.fork()
 
