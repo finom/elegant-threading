@@ -79,7 +79,7 @@ Overall execution time is going to be not more than execution time of the heavie
 
 ## Thread termination via threadedFunction.terminate()
 
-If a forked function is done its job and you want to make it process to die you can terminate it easily.
+If a forked function is done its job and you want to make its process to die you can terminate it easily.
 
 ```js
 const heavyCalculations = thread(function heavyCalculations(a, b, c) {
