@@ -6,7 +6,7 @@
   "scripts": {
     "test": "npm run lint && npm run node-test && npm run browser-test",
     "lint": "eslint . --fix",
-    "build": "webpack --mode development",
+    "build": "webpack --mode production",
     "node-test": "npx jasmine --config=jasmine.json",
     "browser-test": "karma start",
     "postversion": "git push && git push --tags"
