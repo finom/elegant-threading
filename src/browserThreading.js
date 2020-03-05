@@ -1,5 +1,5 @@
 const {
-  stringifyExpored, stringifySource, getError, getSourceFunctionName,
+  stringifyExpored, stringifySource, getError, getSourceFunctionName, workerSymbol,
 } = require('./helpers');
 
 let id = 0;
@@ -43,48 +43,55 @@ function browserThreading(source, exported) {
           lineNumber: e.lineNumber,
           columnNumber: e.columnNumber,
         }; }
-        postMessage({ type: 'call', result: result, error: error, id: e.data.id });
+
+        postMessage({
+          type: 'call',
+          result: result,
+          error: error,
+          id: e.data.id,
+          transferableList: e.data.transferableList,
+        }, e.data.transferableList || []);
       }
     `], { type: 'text/javascript' }),
   ));
 
-  const threadedFunction = (...message) => new Promise((resolve, reject) => {
-    if (worker.__isTerminated) {
-      throw getError('TERMINATED');
-    }
-    const currentId = id++;
-    const onMessage = ({ data }) => {
-      if (data.id === currentId) {
-        if (data.type === 'call') {
-          worker.removeEventListener('message', onMessage);
-          worker.removeEventListener('message', onError); // eslint-disable-line no-use-before-define
-          if (data.error) {
-            reject(Object.assign(Object.create(Error.prototype), data.error));
-          } else {
-            resolve(data.result);
-          }
-        } else if (data.type === 'console') {
+  const threadedFunction = (...message) => {
+    const transferableList = threadedFunction.__transferableList;
+    delete threadedFunction.__transferableList;
+
+    return new Promise((resolve, reject) => {
+      if (worker.__isTerminated) throw getError('TERMINATED');
+      const currentId = id++;
+      const onMessage = ({ data }) => {
+        if (data.id === currentId) {
+          if (data.type === 'call') {
+            worker.removeEventListener('message', onMessage);
+            worker.removeEventListener('error', onError); // eslint-disable-line no-use-before-define
+            if (data.error) {
+              reject(Object.assign(Object.create(Error.prototype), data.error));
+            } else {
+              resolve(data.result);
+            }
+          } else if (data.type === 'console') {
           // eslint-disable-next-line no-console
-          console[data.method](...data.args);
+            console[data.method](...data.args);
+          }
         }
-      }
-    };
+      };
 
-    const onError = (e) => {
-      worker.removeEventListener('message', onMessage);
-      worker.removeEventListener('message', onError);
-      reject(e);
-    };
+      const onError = (e) => {
+        worker.removeEventListener('message', onMessage);
+        worker.removeEventListener('error', onError);
+        reject(e);
+      };
 
-    worker.addEventListener('message', onMessage);
-    worker.addEventListener('error', onError);
-    worker.postMessage({ message, id: currentId });
-  });
-
-  threadedFunction.terminate = () => {
-    worker.__isTerminated = true;
-    worker.terminate();
+      worker.addEventListener('message', onMessage);
+      worker.addEventListener('error', onError);
+      worker.postMessage({ message, id: currentId, transferableList }, transferableList);
+    });
   };
+
+  threadedFunction[workerSymbol] = worker;
 
   return threadedFunction;
 }

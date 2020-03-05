@@ -4,6 +4,8 @@ function getError(name) {
   return new Error(`Threading error: ${{
     TERMINATED: 'Cannot call threaded function because its worker was terminated',
     EXPORT_FUNCTION_DECLARATION: 'Exported functions need to be defined as function declaration',
+    TRANSFERABLE_ARRAY: 'Transferable items must be an array',
+    SET_IS_TERMINATED: 'threadedFunction.isTerminated cannot be set',
   }[name]}` || 'Unknown error');
 }
 
@@ -26,6 +28,8 @@ function getSourceFunctionName(source) {
   return source.name || defaultMainFunctionName;
 }
 
+const workerSymbol = Symbol('worker');
+
 module.exports = {
-  stringifyExpored, stringifySource, getError, getSourceFunctionName,
+  stringifyExpored, stringifySource, getError, getSourceFunctionName, workerSymbol,
 };

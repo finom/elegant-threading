@@ -93,6 +93,51 @@ heavyCalculations.terminate();
 const result2 = await heavyCalculations(a, b, c); // error
 ```
 
+Every fork needs to be terminated individually. You can use `threadedFunction.isTerminated` to check if a threaded function was terminated.
+
+```js
+console.log(heavyCalculations.isTerminated); // false
+heavyCalculations.terminate();
+console.log(heavyCalculations.isTerminated); // true
+```
+
+## Passing Transferable objects via threadedFunction.callWithTransferable(transferableList, ...args)
+
+To pass a [Transferable](https://developer.mozilla.org/en-US/docs/Web/API/Transferable) object to a thread you need to call it using `callWithTransferable`. The first argument of this function is an array of transferable objects, rest arguments behave like regular arguments.
+
+```js
+// regular call
+const result = await heavyCalculations(a, b, c);
+
+// using transferable
+const result = await heavyCalculations.callWithTransferable([...transferableList], a, b, c);
+```
+
+After the threaded function is executed, the passed transferable objects are **automatically transferred back to the parent thread**.
+
+```js
+let buffer = new ArrayBuffer(8);
+let view = new Int32Array(buffer);
+view[0] = 1;
+view[1] = 2;
+
+console.log(view); // [1, 2]
+
+const f = thread((workerBuffer, a, b) => {
+  const workerView = new Int32Array(workerBuffer);
+  workerView[0] = a;
+  workerView[1] = b;
+  return workerBuffer;
+});
+
+buffer = await f.callWithTransferable([buffer], buffer, 3, 4);
+view = new Int32Array(buffer);
+
+console.log(view); // [3, 4]
+```
+
+
+
 ## Code splitting
 
 If you want to split a big threaded function into smaller functions it's recommended to do it inside the threaded function.
@@ -143,7 +188,3 @@ Is's a requirement that every exported function needs to be defined as [function
 ## Tests
 
 Tests can be run via `npm test`. They're powered by Jasmine and Karma to make them to be executed both at NodeJS and browser environments.
-
-## Additional information
-
-- [Transferable](https://developer.mozilla.org/en-US/docs/Web/API/Transferable) objects aren't able to be transferred yet because they become unavailable at other threads (for the main thread and for other forks). If you have an idea how it could be done in a nice and straightforward way, please create an issue.

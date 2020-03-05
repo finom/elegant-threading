@@ -1,5 +1,5 @@
 const {
-  stringifyExpored, stringifySource, getError, getSourceFunctionName,
+  stringifyExpored, stringifySource, getError, getSourceFunctionName, workerSymbol,
 } = require('./helpers');
 
 let id = 0;
@@ -12,7 +12,11 @@ function nodeThreading(source, exported) {
       const { parentPort, MessageChannel } = require('worker_threads');
 
       parentPort.on('message', function(data0) {
-        parentPort.postMessage({ result: ${getSourceFunctionName(source)}.apply(this, data0.message), id: data0.id });
+        parentPort.postMessage({
+          result: ${getSourceFunctionName(source)}.apply(this, data0.message),
+          id: data0.id,
+          transferableList: data0.transferableList,
+        }, data0.transferableList || []);
       });
 
     `,
@@ -24,37 +28,36 @@ function nodeThreading(source, exported) {
   const kHandle = worker[kHandleSymbol];
 
 
-  const threadedFunction = (...message) => new Promise((resolve, reject) => {
-    if (worker.__isTerminated) {
-      throw getError('TERMINATED');
-    }
-    const currentId = id++;
-    const onMessage = (data) => {
-      if (data.id === currentId) {
+  const threadedFunction = (...message) => {
+    const transferableList = threadedFunction.__transferableList;
+    delete threadedFunction.__transferableList;
+    return new Promise((resolve, reject) => {
+      if (worker.__isTerminated) throw getError('TERMINATED');
+      const currentId = id++;
+      const onMessage = (data) => {
+        if (data.id === currentId) {
+          kHandle.unref();
+          worker.off('message', onMessage);
+          worker.off('message', onError); // eslint-disable-line no-use-before-define
+          resolve(data.result);
+        }
+      };
+
+      const onError = (e) => {
         kHandle.unref();
         worker.off('message', onMessage);
-        worker.off('message', onError); // eslint-disable-line no-use-before-define
-        resolve(data.result);
-      }
-    };
+        worker.off('message', onError);
+        reject(e);
+      };
 
-    const onError = (e) => {
-      kHandle.unref();
-      worker.off('message', onMessage);
-      worker.off('message', onError);
-      reject(e);
-    };
-
-    kHandle.ref();
-    worker.on('message', onMessage);
-    worker.on('error', onError);
-    worker.postMessage({ message, id: currentId });
-  });
-
-  threadedFunction.terminate = () => {
-    worker.__isTerminated = true;
-    worker.terminate();
+      kHandle.ref();
+      worker.on('message', onMessage);
+      worker.on('error', onError);
+      worker.postMessage({ message, id: currentId, transferableList }, transferableList || []);
+    });
   };
+
+  threadedFunction[workerSymbol] = worker;
 
   return threadedFunction;
 }

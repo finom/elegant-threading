@@ -8,7 +8,10 @@ describe('Main', () => {
 
   it('should throw an error if worker is terminated', (done) => {
     const f = thread(() => {});
+    expect(f.isTerminated).toBe(false);
     f.terminate();
+    expect(f.isTerminated).toBe(true);
+    expect(() => { f.isTerminated = false; }).toThrow();
 
     f().then(() => done(new Error('Promise should not be resolved')), () => done());
   });
@@ -113,5 +116,31 @@ describe('Main', () => {
     console.log('console check');
     /* eslint-enable no-console */
     await f();
+  });
+
+  it('supports Transferable objects', async () => {
+    let buffer = new ArrayBuffer(8);
+    let view = new Int32Array(buffer);
+    view[0] = 1;
+    view[1] = 2;
+
+    expect(Array.from(view)).toEqual([1, 2]);
+
+    const f = thread((workerBuffer, a, b) => {
+      const workerView = new Int32Array(workerBuffer);
+
+      workerView[0] = a;
+      workerView[1] = b;
+
+      // TODO how to test that the object was actually transferred back?
+      return workerBuffer;
+    });
+
+    buffer = await f.callWithTransferable([buffer], buffer, 3, 4);
+    // we expect that we have lost access to the transferrable object
+    expect(() => Array.from(view)).toThrow();
+    view = new Int32Array(buffer);
+
+    expect(Array.from(view)).toEqual([3, 4]);
   });
 });
