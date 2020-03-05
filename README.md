@@ -103,7 +103,7 @@ console.log(heavyCalculations.isTerminated); // true
 
 ## Passing Transferable objects via threadedFunction.callWithTransferable(transferableList, ...args)
 
-To pass a [Transferable](https://developer.mozilla.org/en-US/docs/Web/API/Transferable) object to a thread you need to call it using `callWithTransferable`. The first argument of this function is an array of transferable objects, rest arguments behave like regular arguments.
+To pass a [Transferable](https://developer.mozilla.org/en-US/docs/Web/API/Transferable) object to a thread you need to call the threaded function using `callWithTransferable`. The first argument of this function is an array of transferable objects, rest arguments behave like regular arguments.
 
 ```js
 // regular call
