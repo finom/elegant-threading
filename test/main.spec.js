@@ -143,4 +143,26 @@ describe('Main', () => {
 
     expect(Array.from(view)).toEqual([3, 4]);
   });
+
+  // disable test for older environments
+  (typeof SharedArrayBuffer === 'undefined' ? xit : it)('should work fine with SharedArrayBuffer', async () => {
+    if (typeof SharedArrayBuffer === 'undefined') return;
+    const buffer = new SharedArrayBuffer(8); // eslint-disable-line no-undef
+    const view = new Int32Array(buffer);
+    view[0] = 1;
+    view[1] = 2;
+
+    expect(Array.from(view)).toEqual([1, 2]);
+
+    const f = thread((workerBuffer, a, b) => {
+      const workerView = new Int32Array(workerBuffer);
+
+      workerView[0] = a;
+      workerView[1] = b;
+    });
+
+    await f(buffer, 3, 4);
+
+    expect(Array.from(view)).toEqual([3, 4]);
+  });
 });
