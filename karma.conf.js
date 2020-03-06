@@ -3,7 +3,8 @@
 
 module.exports = function karmaConf(config) {
   config.set({
-
+    // How long will Karma wait for a message from a browser before disconnecting from it (in ms).
+    browserNoActivityTimeout: 1000 * 60 * 5,
     // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: '',
 

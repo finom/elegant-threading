@@ -147,7 +147,7 @@ describe('Main', () => {
   // disable test for older environments
   (typeof SharedArrayBuffer === 'undefined' ? xit : it)('should work fine with SharedArrayBuffer', async () => {
     if (typeof SharedArrayBuffer === 'undefined') return;
-    const buffer = new SharedArrayBuffer(8); // eslint-disable-line no-undef
+    const buffer = new SharedArrayBuffer(8);
     const view = new Int32Array(buffer);
     view[0] = 1;
     view[1] = 2;

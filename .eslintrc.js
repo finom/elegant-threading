@@ -10,6 +10,8 @@ module.exports = {
       jasmine: true,
     },
     globals: {
-        window: true
+        window: true,
+        Atomics: true,
+        SharedArrayBuffer: true,
     }
 };
