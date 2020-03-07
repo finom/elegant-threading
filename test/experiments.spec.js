@@ -9,12 +9,12 @@ function retrieveJSONData(buffer) {
   const DATA_BEGIN_INDEX = 2;
   let data;
 
-  const length = Atomics.load(view, LENGTH_INDEX);
+  const length = view[LENGTH_INDEX];
   if (length) {
     const chars = [];
     // Retieve chars starting index 2, since other two are taken by the lock and string length
     for (let i = DATA_BEGIN_INDEX; i < length + DATA_BEGIN_INDEX; i++) {
-      chars.push(String.fromCharCode(Atomics.load(view, i)));
+      chars.push(String.fromCharCode(view[i]));
     }
     const jsonString = chars.join('');
     try {
@@ -33,6 +33,8 @@ function retrieveJSONData(buffer) {
 
 // The function locks given buffer for modifications returned from dataHandler
 // After dataHandler is done, the buffer is unlcoked again
+// Note that we're going to get and set typed array items via `t[i]` and `t[i]=v`
+// instead of Atomics.load and Atomics.store because the first way is a bit faster
 function sharedJSONData(buffer, dataHandler) {
   const view = new Int32Array(buffer);
   const LOCKED = 1;
@@ -59,13 +61,13 @@ function sharedJSONData(buffer, dataHandler) {
   }
 
   // Get length of stored JSON
-  const length = Atomics.load(view, LENGTH_INDEX);
+  const length = view[LENGTH_INDEX];
   let data;
   if (length) {
     const chars = [];
     // Retieve chars starting index 2, since other two are taken by the lock and string length
     for (let i = DATA_BEGIN_INDEX; i < length + DATA_BEGIN_INDEX; i++) {
-      chars.push(String.fromCharCode(Atomics.load(view, i)));
+      chars.push(String.fromCharCode(view[i]));
     }
     const jsonString = chars.join('');
     try {
@@ -90,10 +92,10 @@ function sharedJSONData(buffer, dataHandler) {
       const jsonToBeSaved = JSON.stringify(newData);
       // Update memory only if JSON is modified
       if (JSON.stringify(data) !== jsonToBeSaved) {
-        Atomics.store(view, LENGTH_INDEX, jsonToBeSaved.length);
+        view[LENGTH_INDEX] = jsonToBeSaved.length;
 
         for (let i = 0; i < jsonToBeSaved.length; i++) {
-          Atomics.store(view, DATA_BEGIN_INDEX + i, jsonToBeSaved[i].charCodeAt(0));
+          view[DATA_BEGIN_INDEX + i] = jsonToBeSaved[i].charCodeAt(0);
         }
       }
     }
@@ -102,7 +104,7 @@ function sharedJSONData(buffer, dataHandler) {
   }
 
   // Unlock data to be used at other threads
-  Atomics.store(view, LOCK_INDEX, UNLOCKED);
+  view[LOCK_INDEX] = UNLOCKED;
   // Notify one process about LOCK_INDEX change
   Atomics.notify(view, LOCK_INDEX, 1);
 
@@ -119,10 +121,10 @@ describe('Experiments', () => {
   afterEach(() => {
     jasmine.DEFAULT_TIMEOUT_INTERVAL = DEFAULT_TIMEOUT_INTERVAL;
   });
-  it('should work with shared JSON data', async () => {
+  fit('should work with shared JSON data', async () => {
     const sharedBuffer = new SharedArrayBuffer(2 ** 10); // let it be 1 KB for this test
-    const forksNumber = 200;
-    const workerLoopCycles = 100000;
+    const forksNumber = 100;
+    const workerLoopCycles = 10000;
 
     const crazyJSON = thread((workerBuffer, loopCycles) => {
       let i = loopCycles;
@@ -130,8 +132,8 @@ describe('Experiments', () => {
         // The unused vars is left just to not forget what the function returns
         // eslint-disable-next-line no-unused-vars
         const [prev, curr] = sharedJSONData(workerBuffer, (data) => ({
-          overallCycles: (data ? data.overallCycles : 0) + 1,
           randomString: Math.random().toString(36).substring(Math.round(Math.random() * 10)),
+          overallCycles: (data ? data.overallCycles : 0) + 1,
         }));
       }
     }, [sharedJSONData]);
@@ -142,8 +144,20 @@ describe('Experiments', () => {
       promises.push(crazyJSON.fork()(sharedBuffer, workerLoopCycles));
     }
 
+    console.time('sharedJSONData');
     // Wait for all forks to be done
     await Promise.all(promises);
+    console.timeEnd('sharedJSONData');
+
+    const controlData = {};
+    console.time('straightforward');
+    for (let i = 0; i < forksNumber * workerLoopCycles; i++) {
+      controlData.randomString = Math.random().toString(36)
+        .substring(Math.round(Math.random() * 10));
+      controlData.overallCycles = (controlData.overallCycles ? controlData.overallCycles : 0) + 1;
+    }
+    console.timeEnd('straightforward');
+    console.log('controlData', controlData);
 
     const data = retrieveJSONData(sharedBuffer);
 
