@@ -121,7 +121,7 @@ describe('Experiments', () => {
   afterEach(() => {
     jasmine.DEFAULT_TIMEOUT_INTERVAL = DEFAULT_TIMEOUT_INTERVAL;
   });
-  fit('should work with shared JSON data', async () => {
+  it('should work with shared JSON data', async () => {
     const sharedBuffer = new SharedArrayBuffer(2 ** 10); // let it be 1 KB for this test
     const forksNumber = 100;
     const workerLoopCycles = 10000;
