@@ -124,7 +124,7 @@ describe('Experiments', () => {
   });
   it('should work with shared JSON data', async () => {
     const sharedBuffer = new SharedArrayBuffer(2 ** 25); // let it be 1 KB for this test
-    const forksNumber = 100;
+    const forksNumber = 10;
     const workerLoopCycles = 10;
 
     const crazyJSON = thread((workerBuffer, loopCycles, randomString) => {
