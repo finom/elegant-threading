@@ -63,13 +63,14 @@ function sharedJSONData(buffer, dataHandler) {
   // Get length of stored JSON
   const length = view[LENGTH_INDEX];
   let data;
+  let jsonString;
   if (length) {
     const chars = [];
     // Retieve chars starting index 2, since other two are taken by the lock and string length
     for (let i = DATA_BEGIN_INDEX; i < length + DATA_BEGIN_INDEX; i++) {
       chars.push(String.fromCharCode(view[i]));
     }
-    const jsonString = chars.join('');
+    jsonString = chars.join('');
     try {
       data = JSON.parse(jsonString);
     } catch (e) {
@@ -91,7 +92,7 @@ function sharedJSONData(buffer, dataHandler) {
     if (typeof newData !== 'undefined') {
       const jsonToBeSaved = JSON.stringify(newData);
       // Update memory only if JSON is modified
-      if (JSON.stringify(data) !== jsonToBeSaved) {
+      if (jsonString !== jsonToBeSaved) {
         view[LENGTH_INDEX] = jsonToBeSaved.length;
 
         for (let i = 0; i < jsonToBeSaved.length; i++) {
@@ -116,23 +117,23 @@ describe('Experiments', () => {
   let DEFAULT_TIMEOUT_INTERVAL;
   beforeEach(() => {
     DEFAULT_TIMEOUT_INTERVAL = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000 * 60 * 10;
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000 * 60 * 20;
   });
   afterEach(() => {
     jasmine.DEFAULT_TIMEOUT_INTERVAL = DEFAULT_TIMEOUT_INTERVAL;
   });
   it('should work with shared JSON data', async () => {
-    const sharedBuffer = new SharedArrayBuffer(2 ** 10); // let it be 1 KB for this test
+    const sharedBuffer = new SharedArrayBuffer(2 ** 25); // let it be 1 KB for this test
     const forksNumber = 100;
-    const workerLoopCycles = 10000;
+    const workerLoopCycles = 10;
 
-    const crazyJSON = thread((workerBuffer, loopCycles) => {
+    const crazyJSON = thread((workerBuffer, loopCycles, randomString) => {
       let i = loopCycles;
       while (i--) {
         // The unused vars is left just to not forget what the function returns
         // eslint-disable-next-line no-unused-vars
         const [prev, curr] = sharedJSONData(workerBuffer, (data) => ({
-          randomString: Math.random().toString(36).substring(Math.round(Math.random() * 10)),
+          randomString,
           overallCycles: (data ? data.overallCycles : 0) + 1,
         }));
       }
@@ -140,8 +141,11 @@ describe('Experiments', () => {
 
     const promises = [];
     for (let i = 0; i < forksNumber; i++) {
+      const randomString = Array.from(Array(100000)).map(
+        () => Math.random().toString(36).substring(Math.round(Math.random() * 10)),
+      );
       // Create and run forksNumber forks
-      promises.push(crazyJSON.fork()(sharedBuffer, workerLoopCycles));
+      promises.push(crazyJSON.fork()(sharedBuffer, workerLoopCycles, randomString));
     }
 
     console.time('sharedJSONData');
@@ -152,14 +156,17 @@ describe('Experiments', () => {
     const controlData = {};
     console.time('straightforward');
     for (let i = 0; i < forksNumber * workerLoopCycles; i++) {
-      controlData.randomString = Math.random().toString(36)
-        .substring(Math.round(Math.random() * 10));
+      const randomString = Array.from(Array(100000)).map(
+        () => Math.random().toString(36).substring(Math.round(Math.random() * 10)),
+      );
+      controlData.randomString = randomString;
       controlData.overallCycles = (controlData.overallCycles ? controlData.overallCycles : 0) + 1;
     }
     console.timeEnd('straightforward');
-    console.log('controlData', controlData);
 
     const data = retrieveJSONData(sharedBuffer);
+    console.log('data', JSON.stringify(data).length, data);
+
 
     expect(data.overallCycles).toBe(forksNumber * workerLoopCycles);
   });
