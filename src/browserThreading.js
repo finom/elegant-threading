@@ -44,13 +44,16 @@ function browserThreading(source, exported) {
           columnNumber: e.columnNumber,
         }; }
 
-        postMessage({
-          type: 'call',
-          result: result,
-          error: error,
-          id: e.data.id,
-          transferableList: e.data.transferableList,
-        }, e.data.transferableList || []);
+        Promise.resolve(result).then(function(promiseResult) {
+          postMessage({
+            type: 'call',
+            result: promiseResult,
+            error: error,
+            id: e.data.id,
+            transferableList: e.data.transferableList,
+          }, e.data.transferableList || []);
+        })
+        
       }
     `], { type: 'text/javascript' }),
   ));

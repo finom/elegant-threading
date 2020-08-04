@@ -12,11 +12,15 @@ function nodeThreading(source, exported) {
       const { parentPort, MessageChannel } = require('worker_threads');
 
       parentPort.on('message', function(data0) {
-        parentPort.postMessage({
-          result: ${getSourceFunctionName(source)}.apply(this, data0.message),
-          id: data0.id,
-          transferableList: data0.transferableList,
-        }, data0.transferableList || []);
+        const result = ${getSourceFunctionName(source)}.apply(this, data0.message);
+
+        Promise.resolve(result).then((promiseResult) => {
+          parentPort.postMessage({
+            result: promiseResult,
+            id: data0.id,
+            transferableList: data0.transferableList,
+          }, data0.transferableList || []);
+        });
       });
 
     `,

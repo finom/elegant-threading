@@ -6,6 +6,11 @@ describe('Main', () => {
     expect(await f(1, 2, 3)).toBe(6);
   });
 
+  it('should run simple calculations made at promise', async () => {
+    const f = thread((a, b, c) => new Promise((resolve) => resolve(a + b + c)));
+    expect(await f(1, 2, 3)).toBe(6);
+  });
+
   it('should throw an error if worker is terminated', (done) => {
     const f = thread(() => {});
     expect(f.isTerminated).toBe(false);

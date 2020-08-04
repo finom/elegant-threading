@@ -123,7 +123,7 @@ describe('Experiments', () => {
     jasmine.DEFAULT_TIMEOUT_INTERVAL = DEFAULT_TIMEOUT_INTERVAL;
   });
   it('should work with shared JSON data', async () => {
-    const sharedBuffer = new SharedArrayBuffer(2 ** 25); // let it be 1 KB for this test
+    const sharedBuffer = new SharedArrayBuffer(2 ** 15); // let it be 1 KB for this test
     const forksNumber = 10;
     const workerLoopCycles = 10;
 
@@ -141,7 +141,7 @@ describe('Experiments', () => {
 
     const promises = [];
     for (let i = 0; i < forksNumber; i++) {
-      const randomString = Array.from(Array(100000)).map(
+      const randomString = Array.from(Array(100)).map(
         () => Math.random().toString(36).substring(Math.round(Math.random() * 10)),
       );
       // Create and run forksNumber forks
@@ -165,7 +165,6 @@ describe('Experiments', () => {
     console.timeEnd('straightforward');
 
     const data = retrieveJSONData(sharedBuffer);
-    console.log('data', JSON.stringify(data).length, data);
 
 
     expect(data.overallCycles).toBe(forksNumber * workerLoopCycles);
