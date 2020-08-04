@@ -1,25 +1,15 @@
 const {
-  stringifyExpored, stringifySource, getError, getSourceFunctionName, workerSymbol,
+  stringifyWorkerSource, getError, workerSymbol,
 } = require('./helpers');
+
+const workerThreadSource = require('./workerThreadSource');
 
 let id = 0;
 function nodeThreading(source, exported) {
   // eval is used to get "require" function but it should be invisible for bundlers like Webpack
   const { Worker } = eval('require')('worker_threads'); // eslint-disable-line no-eval
   const worker = new Worker(
-    `${stringifySource(source)}
-    ${stringifyExpored(exported)}
-      const { parentPort, MessageChannel } = require('worker_threads');
-
-      parentPort.on('message', function(data0) {
-        parentPort.postMessage({
-          result: ${getSourceFunctionName(source)}.apply(this, data0.message),
-          id: data0.id,
-          transferableList: data0.transferableList,
-        }, data0.transferableList || []);
-      });
-
-    `,
+    stringifyWorkerSource(workerThreadSource, { source, exported }),
     { eval: true },
   );
 
@@ -53,7 +43,9 @@ function nodeThreading(source, exported) {
       kHandle.ref();
       worker.on('message', onMessage);
       worker.on('error', onError);
-      worker.postMessage({ message, id: currentId, transferableList }, transferableList || []);
+      worker.postMessage({
+        type: 'call', message, id: currentId, transferableList,
+      }, transferableList || []);
     });
   };
 

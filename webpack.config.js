@@ -1,7 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 
-module.exports = {
+module.exports = [{
   devtool: 'source-map',
   entry: './src/index',
   output: {
@@ -24,4 +24,4 @@ Released under the MIT license
 More info: https://github.com/finom/elegant-threading
     `.trim()),
   ],
-};
+}];
