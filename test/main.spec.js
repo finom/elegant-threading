@@ -1,4 +1,4 @@
-const thread = require('../src/');
+const thread = require('../src');
 
 describe('Main', () => {
   it('should run simple calculations', async () => {

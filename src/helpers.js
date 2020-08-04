@@ -23,7 +23,6 @@ function stringifySource(source) {
   return source.name ? source.toString() : `const ${defaultMainFunctionName} = ${source.toString()};`;
 }
 
-
 function getSourceFunctionName(source) {
   return source.name || defaultMainFunctionName;
 }

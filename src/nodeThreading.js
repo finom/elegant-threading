@@ -31,7 +31,6 @@ function nodeThreading(source, exported) {
   const kHandleSymbol = symbols.find(({ description }) => description === 'kHandle');
   const kHandle = worker[kHandleSymbol];
 
-
   const threadedFunction = (...message) => {
     const transferableList = threadedFunction.__transferableList;
     delete threadedFunction.__transferableList;
@@ -65,6 +64,5 @@ function nodeThreading(source, exported) {
 
   return threadedFunction;
 }
-
 
 module.exports = nodeThreading;

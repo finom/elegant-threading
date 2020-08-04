@@ -1,4 +1,4 @@
-const thread = require('../src/');
+const thread = require('../src');
 
 // The function is used to retrieve JSON data from SharedArrayBuffer
 // It supposed to be used in browsers only because Atomics.wait locks a process where it's run
@@ -112,7 +112,6 @@ function sharedJSONData(buffer, dataHandler) {
   return [data, newData];
 }
 
-
 describe('Experiments', () => {
   let DEFAULT_TIMEOUT_INTERVAL;
   beforeEach(() => {
@@ -165,7 +164,6 @@ describe('Experiments', () => {
     console.timeEnd('straightforward');
 
     const data = retrieveJSONData(sharedBuffer);
-
 
     expect(data.overallCycles).toBe(forksNumber * workerLoopCycles);
   });

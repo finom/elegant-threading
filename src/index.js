@@ -41,5 +41,4 @@ function elegantThreading(source, imports) {
   return threadedFunction;
 }
 
-
 module.exports = elegantThreading;
