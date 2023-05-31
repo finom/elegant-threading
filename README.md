@@ -1,4 +1,4 @@
-# elegant-threading [![npm version](https://badge.fury.io/js/elegant-threading.svg)](https://badge.fury.io/js/elegant-threading) [![Build Status](https://travis-ci.org/finom/elegant-threading.svg)](https://travis-ci.org/finom/elegant-threading)
+# elegant-threading [![npm version](https://badge.fury.io/js/elegant-threading.svg)](https://badge.fury.io/js/elegant-threading)
 
 > A straightforward definition of multi-threaded functions for NodeJS and browser
 
