@@ -43,7 +43,7 @@
     "karma-chrome-launcher": "^3.1.0",
     "karma-jasmine": "^3.3.1",
     "karma-webpack": "^4.0.2",
-    "npm-check-updates": "^7.0.2",
+    "npm-check-updates": "^16.10.15",
     "webpack": "^4.44.1",
     "webpack-cli": "^3.3.12"
   },
